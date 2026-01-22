@@ -346,7 +346,9 @@ and README.md.
   \tex_mathop:D
   { \__sumcorner_inverse_kern:N \l__sumcorner_tmpa_dim
     \sum \tex_nolimits:D ^ { \tex_kern:D \l__sumcorner_tmpc_dim \smash { #2 } } }
-  \tex_limits:D ^ { #4 } \sb { #5 }
+  \tex_limits:D
+  \tl_if_blank:nTF { #4 } { } { ^ { #4 } }
+  \tl_if_blank:nTF { #5 } { } { \sb { #5 } }
 }
 %    \end{macrocode}
 %  \end{macro}
@@ -354,60 +356,20 @@ and README.md.
 % \begin{macro}{\sumcorner}
 %    \begin{macrocode}
 \ExplSyntaxOff
-\NewDocumentCommand{\sumcorner}{s O{\prime} e{^_} t'}{
-  \IfNoValueTF{#3}{
-    \IfNoValueTF{#4}{
-      \sum \nolimits ^{#2}
+\NewDocumentCommand{\sumcorner}{s O{\prime} E{^_}{{}{}} t'}{
+  \IfBooleanTF{#1}{
+    \IfBooleanTF{#5}{
+      \sumcorner *[#2]^{#3\prime}_{#4}
     }{
-      \IfBooleanTF{#1}{
-        \IfBooleanTF{#5}{
-          \sumcorner *[#2]^{\prime}_{#4}
-        }{
-          \@sumcorner@mathpalette
-          {\@sumcorner@aux *{#2}}{\relax}{#4}
-        }
-      }{
-        \IfBooleanTF{#5}{
-          \sumcorner[#2]^{\prime}_{#4}
-        }{
-          \@sumcorner@mathpalette
-          {\@sumcorner@aux{#2}}{\relax}{#4}
-        }
-      }
+      \@sumcorner@mathpalette
+      {\@sumcorner@aux *{#2}}{#3}{#4}
     }
   }{
-    \IfBooleanTF{#1}{
-      \IfNoValueTF{#4}{
-        \IfBooleanTF{#5}{
-          \sumcorner *[#2]^{#3\prime}_{#4}
-        }{
-          \@sumcorner@mathpalette
-          {\@sumcorner@aux *{#2}}{#3}{\relax}
-        }
-      }{
-        \IfBooleanTF{#5}{
-          \sumcorner *[#2]^{#3\prime}_{#4}
-        }{
-          \@sumcorner@mathpalette
-          {\@sumcorner@aux *{#2}}{#3}{#4}
-        }
-      }
+    \IfBooleanTF{#5}{
+      \sumcorner[#2]^{#3\prime}_{#4}
     }{
-      \IfNoValueTF{#4}{
-        \IfBooleanTF{#5}{
-          \sumcorner[#2]^{#3\prime}_{#4}
-        }{
-          \@sumcorner@mathpalette
-          {\@sumcorner@aux *{#2}}{#3}{\relax}
-        }
-      }{
-        \IfBooleanTF{#5}{
-          \sumcorner[#2]^{#3\prime}_{#4}
-        }{
-          \@sumcorner@mathpalette
-          {\@sumcorner@aux {#2}}{#3}{#4}
-        }
-      }
+      \@sumcorner@mathpalette
+      {\@sumcorner@aux {#2}}{#3}{#4}
     }
   }
 }
