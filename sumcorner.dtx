@@ -290,10 +290,10 @@ and README.md.
 % \end{variable}
 % 
 % \subsection{具体实现}
-% \begin{macro}{\_@@_mathpalette:nnn,\_@@_inverse_kern:N}
+% \begin{macro}{\@sumcorner@mathpalette,\_@@_inverse_kern:N}
 %    首先是一个 |\mathpalette| 的多元替代，
 %    \begin{macrocode}
-\cs_new:Npn \_@@_mathpalette:nnn #1#2#3 {
+\cs_new:Npn \@sumcorner@mathpalette #1#2#3 {
   \tex_mathchoice:D { #1\tex_displaystyle:D { #2 } { #3 } }
   { #1\tex_textstyle:D { #2 } { #3 } }
   { #1\tex_scriptstyle:D { #2 } { #3 } }
@@ -305,9 +305,9 @@ and README.md.
 %    \end{macrocode}
 % \end{macro}
 % 然后一通爆算，
-% \begin{macro}{\_@@_aux:w}
+% \begin{macro}{\@sumcorner@aux}
 %    \begin{macrocode}
-\NewDocumentCommand { \_@@_aux:w }{ smmmm } {
+\NewDocumentCommand { \@sumcorner@aux }{ smmmm } {
   \hbox_set:Nn \l_@@_tmpa_box { $ #3 \sum $ }
   \hbox_set:Nn \l_@@_tmpb_box { $ #3 \sum \nolimits ^ { #2 } $ }
   \hbox_set:Nn \l_@@_tmpc_box { $ #3 ^ { #4 } $ }
@@ -347,31 +347,32 @@ and README.md.
 %  最后简单分类讨论一下即可。
 % \begin{macro}{\sumcorner}
 %    \begin{macrocode}
-\NewDocumentCommand { \sumcorner } { s O{\prime} e{^\sb} } {
-  \tex_mathop:D {
+\ExplSyntaxOff
+\NewDocumentCommand { \sumcorner } { s O{\prime} e{^_} } {
+  \mathop {
   \IfNoValueTF { #3 } {
       \IfNoValueTF { #4 } {
-      \sum \tex_nolimits:D ^ { #2 }
+      \sum \nolimits ^ { #2 }
       } {
-      \_@@_mathpalette:nnn
-        { \_@@_aux:w { #1} } { \scan_stop: } { #4 }
+      \@sumcorner@mathpalette
+        { \@sumcorner@aux { #1} } { \relax } { #4 }
       }
   } {
       \IfBooleanTF { #1 } {
       \IfNoValueTF { #4 } {
-          \_@@_mathpalette:nnn 
-          { \_@@_aux:w * { #2 } } { #3 } { \scan_stop: }
+          \@sumcorner@mathpalette 
+          { \@sumcorner@aux * { #2 } } { #3 } { \relax }
       } {
-          \_@@_mathpalette:nnn
-            { \_@@_aux:w * { #2 } } { #3 } { #4 }
+          \@sumcorner@mathpalette
+            { \@sumcorner@aux * { #2 } } { #3 } { #4 }
       }
       } {
       \IfNoValueTF { #4 } {
-          \_@@_mathpalette:nnn
-            { \_@@_aux:w { #2 } } { #3 } { \scan_stop: }
+          \@sumcorner@mathpalette
+            { \@sumcorner@aux { #2 } } { #3 } { \relax }
       } {
-          \_@@_mathpalette:nnn
-            { \_@@_aux:w { #2 } } { #3 } { #4 }
+          \@sumcorner@mathpalette
+            { \@sumcorner@aux { #2 } } { #3 } { #4 }
         }
       }
     }
