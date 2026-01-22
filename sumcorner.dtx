@@ -1,0 +1,388 @@
+% \iffalse meta-comment
+% !TeX program  = XeLaTeX
+% !TeX encoding = UTF-8
+%
+% Copyright (C) 2026--2026 by Innocent <InnocentFIVE@outlook.com>
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3c of this license or (at your option) any later
+% version. The latest version of this license is in:
+%
+%   http://www.latex-project.org/lppl.txt
+%
+% and version 1.3 or later is part of all distributions of
+% LaTeX version 2005/12/01 or later.
+%
+% This work has the LPPL maintenance status `maintained'.
+%
+% The Current Maintainer of this work is Innocent.
+%
+% This work consists of the files sumcorner.dtx,
+%           and the derived files sumcorner.sty,
+%                                 sumcorner.pdf,
+%                             and README.md.
+%
+%<*internal>
+\iffalse
+    %</internal>
+    %
+    %<*readme>
+    README
+    %</readme>
+    %
+    %<*internal>
+\fi
+\begingroup
+\def\NameOfLaTeXe{LaTeX2e}
+\expandafter\endgroup\ifx\NameOfLaTeXe\fmtname\else
+\csname fi\endcsname
+%</internal>
+%
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+
+\preamble
+
+Copyright (C) 2026--2026 by Innocent <InnocentFIVE@outlook.com>
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either
+version 1.3c of this license or (at your option) any later
+version. The latest version of this license is in:
+
+http://www.latex-project.org/lppl.txt
+
+and version 1.3 or later is part of all distributions of
+LaTeX version 2005/12/01 or later.
+
+This work has the LPPL maintenance status `maintained'.
+
+The Current Maintainer of this work is Innocent.
+
+This work consists of the files sumcorner.dtx,
+and README.md.
+
+\endpreamble
+
+\generate{
+    \file{\jobname.sty}        {\from{\jobname.dtx}{package}}
+    %<*internal>
+    \file{\jobname.ins}        {\from{\jobname.dtx}{install}}
+    %</internal>
+    \nopreamble\nopostamble
+    \file{README.md}           {\from{\jobname.dtx}{readme}}
+}
+
+\obeyspaces
+
+\endbatchfile
+%</install>
+%
+%<*internal>
+\fi
+%</internal>
+%
+%<class|package>\NeedsTeXFormat{LaTeX2e}[2020/10/01]
+%<*!(driver|install)>
+%<!readme>\GetIdInfo $Id: sumcorner.dtx 0.3 2026-01-23 12:00:00Z Innocent <InnocentFIVE@outlook.com> $
+%<package>  {sumcorner}
+%<package>\ProvidesExplPackage{\ExplFileName}
+%<package>{2026-01-23} {} {At the upper right corner of summation}
+%<readme>人类从未知晓萨姆之角的真实样貌。
+%<readme>
+%<readme>> 多年以后，翻开*The TeXbook*，你仍然将会回想起我带你去见识萨姆之角的那个遥远的下午。
+%<readme>
+%<readme># 萨姆之角
+%<readme>
+%<readme>这是一个尝试，用来证明萨姆之角存在性的尝试，为此，我们大量地使用了幻影。除了在文档之中，我们很难意识到萨姆之角的存在性：这是一个非常微妙的细节问题。
+%<readme>为了阐明清楚这个概念，我们不得不从1991年开始说起。著名计算机科学家高德纳在他的著作*The TeXbook*中提出萨姆之角这一概念（事实上，是习题18.44），他将其视为一个难度等级为$2$的习题。
+%<readme>之后，他在同一本著作中，给出了如下论证：
+%<readme>
+%<readme>```tex
+%<readme>\def\sumprime_#1{\setbox0=\hbox{$\scriptstyle{#1}$}
+%<readme>\setbox2=\hbox{$\displaystyle{\sum}$}
+%<readme>\setbox4=\hbox{${}'\mathsurround=0pt$}
+%<readme>\dimen0=.5\wd0 \advance\dimen0 by-.5\wd2
+%<readme>\ifdim\dimen0>0pt
+%<readme>\ifdim\dimen0>\wd4 \kern\wd4 \else\kern\dimen0\fi\fi
+%<readme>\mathop{{\sum}'}_{\kern-\wd4 #1}}
+%<readme>```
+%<readme>
+%<readme>这个论证正是我们的雏形。
+%</!(driver|install)>
+
+%<*driver>
+\documentclass{fdudoc}
+\usepackage{sumcorner,xpatch}
+\usepackage{makeidx}
+
+\ExplSyntaxOn
+
+\xpatchcmd \__codedoc_print_macroname:nN
+{ \__codedoc_get_hyper_target:xN }
+{ \__codedoc_get_hyper_target:eN }
+{ } { \patchfailed }
+\xpatchcmd \__codedoc_print_macroname:nN
+{
+    \tl_replace_all:Non \l__codedoc_tmpa_tl
+    { \c_catcode_other_space_tl }
+    { \fontspec_visible_space: }
+    \__codedoc_macroname_prefix:o \l__codedoc_tmpa_tl
+    \__codedoc_macroname_suffix:N #2
+}
+{ \tl_replace_all:NVn \l__codedoc_tmpa_tl
+    \c_catcode_other_space_tl
+    { \fontspec_visible_space: }
+    \__codedoc_print_macroname_aux:on
+    \l__codedoc_tmpa_tl
+    { \bool_if:NT #2 { \__codedoc_typeset_TF: } } }
+{ } { }
+\makeatletter
+\lstnewenvironment{fsyntax}[1][]{%
+    \lstset{style=style@syntax, #1}\vspace{-1.5ex}}{}
+
+\AtBeginEnvironment { fsyntax }
+{
+    \cs_set:Npn \lparen { \textup { ( } }
+    \cs_set:Npn \rparen { \textup { ) } }
+    \char_set_catcode_active:N |
+    \char_set_catcode_active:N <
+    \char_set_active_eq:NN | \orbar
+    \char_set_active_eq:NN < \syntaxopt@aux
+}
+\makeatother
+\ExplSyntaxOff
+
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+\setmathfont{Asana-Math.otf}
+
+\begin{document}
+\DocInput{\jobname.dtx}
+\clearpage
+\IndexLayout
+\PrintIndex
+\end{document}
+%</driver>
+% \fi
+% \title{萨姆之角 \pkg{sumcorner} \\ \emph{At the upper right corner of summation}}
+% \author{Innocent\\
+% \url{InnocentFIVE@outlook.com}}
+% \maketitle
+% \def\d{\mathrm{dyadic}}
+% \begin{abstract}
+%     我们考察了萨姆之角的存在性。
+% \end{abstract}
+% 
+% \tableofcontents
+% \begin{documentation}
+% \section{引论}
+% 存在一些人类使用$\sum'$来表达特殊的求和，比如说二进求和之类：
+% \[
+%   \sumcorner\sb{n=1}^{\floor{1/\delta^N}}
+%   n^p
+%   \lessapprox\sb{p,N}
+%   \delta^{-Np},\quad
+%   \sumcorner\sb{n=1}^{A}
+%   \frac{1}{n}
+%   =
+%   1 - O\Bigl(\frac{1}{A}\Bigr).
+% \]
+% 有些人类喜欢说话，因此会用$\sum^{\d}$来表示：
+% \[
+%   \sumcorner[\d]\sb{n=1}^{100\floor{1/\delta^N}}
+%   n^p
+%   \lessapprox\sb{p,N}
+%   \delta^{-Np},\quad
+%   \sumcorner[\d]\sb{n=1}^{A}
+%   \frac{1}{n}
+%   =
+%   1 - O\Bigl(\frac{1}{A}\Bigr).
+% \]
+% 当然，我们可以更直接，使用$\sum^2$来表示，比如说：
+% \[ 
+%   \sumcorner[k]\sb{j=1}^{n} :=
+%   \sum\sb{j\in k^{\mathbb{N}},1\leq j\leq n},\qquad
+%   \sumcorner[2]\sb{j=1}^{2^m} j = \Theta(2^m),\quad
+%   \sumcorner[{\sumcorner[2]\sb{j=1}^{2^m} \frac j2}]\sb{k=1}^{2^{mn}} k = \Theta(2^{n-m}).
+% \]
+% 当然，这会使公式稍微变长一些。
+% 
+% 那么，也存在一些人类会询问，如果是 |\textstyle| 情形呢？
+% 
+% 是的，为了防止 |\textstyle| 等情形引发歧义，我们在所有情况都需要保证 |\limits|，也就是
+% $\sumcorner\sb{n=1}^{\floor{1/\delta^N}}$。
+% 
+% 综上所述，我们证明了萨姆之角的存在性。
+% 
+% \section{使用方法}
+% \begin{function}{\sumcorner}
+% \begin{fsyntax}
+%     \sumcorner (*\oarg{*}*) _ (*\oarg{下标}*) ^ (*\oarg{上标}*)
+% \end{fsyntax}
+% 这样就可以了。使用 |*| 和不使用 |*| 的区别是：
+% \[
+% \sumcorner*^{100A+10B}\sb {j=B} f(j) ,\quad
+% \sumcorner^{100A+10B}\sb {j=B} f(j) .
+% \]
+% \end{function}
+% 
+% \end{documentation}
+% 
+% \EnableImplementation
+% \begin{implementation}
+% \newgeometry{
+%   left      = 2.2 in,
+%   right     = 1.00 in,
+%   top       = 1.25 in,
+%   bottom    = 1.00 in,
+%   marginpar = 2.25 in
+% }
+% \section{实现细节}
+%    \begin{macrocode}
+%<@@=sumcorner>
+%<*package>
+%    \end{macrocode}
+%    
+% 首先是检查 \LaTeX3 环境。
+%    \begin{macrocode}
+\RequirePackage { xtemplate, l3keys2e }
+\msg_new:nnn { sumcorner } { l3-too-old }
+{
+    Package~ `#1'~ is~ too~ old. \\\\
+    Please~ update~ an~ up-to-date~ version~ of~ the~ bundles \\
+    `l3kernel'~ and~ `l3packages'~ using~ your~ TeX~ package \\
+    manager~ or~ from~ CTAN.
+}
+\clist_map_inline:nn { xtemplate, l3keys2e }
+{
+    \@ifpackagelater {#1} { 2020/07/17 }
+    { } { \msg_error:nnn { sumcorner } { l3-too-old } {#1} }
+}
+%    \end{macrocode}
+% \subsection{内部变量声明}
+% \begin{variable}{
+% \l_@@_tmpa_box,
+% \l_@@_tmpb_box,
+% \l_@@_tmpc_box,
+% \l_@@_tmpd_box,
+% \l_@@_tmpe_box,
+% \l_@@_tmpa_dim,
+% \l_@@_tmpb_dim,
+% \l_@@_tmpc_dim,
+% \l_@@_tmpd_dim
+% }
+% 临时变量声明。
+%    \begin{macrocode}
+\box_new:N \l_@@_tmpa_box
+\box_new:N \l_@@_tmpb_box
+\box_new:N \l_@@_tmpc_box
+\box_new:N \l_@@_tmpd_box
+\box_new:N \l_@@_tmpe_box
+
+\dim_new:N \l_@@_tmpa_dim
+\dim_new:N \l_@@_tmpb_dim
+\dim_new:N \l_@@_tmpc_dim
+\dim_new:N \l_@@_tmpd_dim
+%    \end{macrocode}
+% \end{variable}
+% 
+% \subsection{具体实现}
+% \begin{macro}{\_@@_mathpalette:nnn,\_@@_inverse_kern:N}
+%    首先是一个 |\mathpalette| 的多元替代，
+%    \begin{macrocode}
+\cs_new:Npn \_@@_mathpalette:nnn #1#2#3 {
+  \tex_mathchoice:D { #1\tex_displaystyle:D { #2 } { #3 } }
+  { #1\tex_textstyle:D { #2 } { #3 } }
+  { #1\tex_scriptstyle:D { #2 } { #3 } }
+  { #1\tex_scriptscriptstyle:D { #2 } { #3 } }
+}
+\cs_new:Nn \_@@_inverse_kern:N {
+  \tex_kern:D #1 \tex_mathopen:D { }
+}
+%    \end{macrocode}
+% \end{macro}
+% 然后一通爆算，
+% \begin{macro}{\_@@_aux:w}
+%    \begin{macrocode}
+\NewDocumentCommand { \_@@_aux:w }{ smmmm } {
+  \hbox_set:Nn \l_@@_tmpa_box { $ #3 \sum $ }
+  \hbox_set:Nn \l_@@_tmpb_box { $ #3 \sum \nolimits ^ { #2 } $ }
+  \hbox_set:Nn \l_@@_tmpc_box { $ #3 ^ { #4 } $ }
+  \hbox_set:Nn \l_@@_tmpd_box { $ #3 \sb { #5 } $ }
+  \dim_set:Nn \l_@@_tmpb_dim {
+    \dim_max:nn { \box_wd:N \l_@@_tmpc_box } 
+    { \box_wd:N \l_@@_tmpd_box }
+  }
+  \dim_compare:nNnTF { \box_wd:N \l_@@_tmpc_box } > 
+  { \box_wd:N \l_@@_tmpa_box } {
+      \IfBooleanTF { #1 } {
+        \dim_set:Nn \l_@@_tmpc_dim { \c_zero_dim }
+      } {
+        \dim_set:Nn \l_@@_tmpc_dim { 
+          \dim_eval:n { ( \box_wd:N \l_@@_tmpc_box - 
+          \box_wd:N \l_@@_tmpa_box ) / 2 } 
+        }
+      }
+    } {
+      \dim_set:Nn \l_@@_tmpc_dim { \c_zero_dim }
+    }
+  \dim_set:Nn \l_@@_tmpa_dim 
+  { \dim_eval:n { \box_wd:N \l_@@_tmpb_box -
+   \box_wd:N \l_@@_tmpa_box + \l_@@_tmpc_dim } }
+  \dim_set:Nn \l_@@_tmpd_dim 
+  { \dim_eval:n { \box_wd:N \l_@@_tmpb_box -
+   \box_wd:N \l_@@_tmpa_box } }
+  \tex_mathop:D { }
+  \tex_kern:D -\l_@@_tmpd_dim \tex_mathopen:D { }
+  \tex_mathop:D 
+  { \_@@_inverse_kern:N \l_@@_tmpa_dim 
+  \sum \tex_nolimits:D ^ { \tex_kern:D \l_@@_tmpc_dim \smash { #2 } } } 
+  \tex_limits:D ^ { #4 } \sb { #5 }
+}
+%    \end{macrocode}
+%  \end{macro}
+%  最后简单分类讨论一下即可。
+% \begin{macro}{\sumcorner}
+%    \begin{macrocode}
+\NewDocumentCommand { \sumcorner } { s O{\prime} e{^\sb} } {
+  \tex_mathop:D {
+  \IfNoValueTF { #3 } {
+      \IfNoValueTF { #4 } {
+      \sum \tex_nolimits:D ^ { #2 }
+      } {
+      \_@@_mathpalette:nnn
+        { \_@@_aux:w { #1} } { \scan_stop: } { #4 }
+      }
+  } {
+      \IfBooleanTF { #1 } {
+      \IfNoValueTF { #4 } {
+          \_@@_mathpalette:nnn 
+          { \_@@_aux:w * { #2 } } { #3 } { \scan_stop: }
+      } {
+          \_@@_mathpalette:nnn
+            { \_@@_aux:w * { #2 } } { #3 } { #4 }
+      }
+      } {
+      \IfNoValueTF { #4 } {
+          \_@@_mathpalette:nnn
+            { \_@@_aux:w { #2 } } { #3 } { \scan_stop: }
+      } {
+          \_@@_mathpalette:nnn
+            { \_@@_aux:w { #2 } } { #3 } { #4 }
+        }
+      }
+    }
+  }
+}
+%</package>
+%<@@=>
+%    \end{macrocode}
+% \end{macro}
+% \end{implementation}
+% \begin{thebibliography}{1}
+%   \bibitem{summation} \rule{3em}{.4pt}. 
+%   ``At the upper right corner of summation,'' \emph{\rule{8em}{.4pt}}: 1--1. 2026.
+% \end{thebibliography}
