@@ -359,31 +359,34 @@ and README.md.
     \IfNoValueTF{#4}{
       \sum \nolimits ^{#2}
     }{
-      \IfBooleanTF{#5}{
-        \sumcorner[#2]
-        ^{\prime}
-        _{#4}
+      \IfBooleanTF{#1}{
+        \IfBooleanTF{#5}{
+          \sumcorner *[#2]^{\prime}_{#4}
+        }{
+          \@sumcorner@mathpalette
+          {\@sumcorner@aux *{#2}}{\relax}{#4}
+        }
       }{
-        \@sumcorner@mathpalette
-        {\@sumcorner@aux{#2}}{\relax}{#4}
+        \IfBooleanTF{#5}{
+          \sumcorner[#2]^{\prime}_{#4}
+        }{
+          \@sumcorner@mathpalette
+          {\@sumcorner@aux{#2}}{\relax}{#4}
+        }
       }
     }
   }{
     \IfBooleanTF{#1}{
       \IfNoValueTF{#4}{
         \IfBooleanTF{#5}{
-          \sumcorner[#2]
-          ^{#3\prime}
-          _{#4}
+          \sumcorner *[#2]^{#3\prime}_{#4}
         }{
           \@sumcorner@mathpalette
           {\@sumcorner@aux *{#2}}{#3}{\relax}
         }
       }{
         \IfBooleanTF{#5}{
-          \sumcorner[#2]
-          ^{#3\prime}
-          _{#4}
+          \sumcorner *[#2]^{#3\prime}_{#4}
         }{
           \@sumcorner@mathpalette
           {\@sumcorner@aux *{#2}}{#3}{#4}
@@ -392,18 +395,14 @@ and README.md.
     }{
       \IfNoValueTF{#4}{
         \IfBooleanTF{#5}{
-          \sumcorner[#2]
-          ^{#3\prime}
-          _{#4}
+          \sumcorner[#2]^{#3\prime}_{#4}
         }{
           \@sumcorner@mathpalette
           {\@sumcorner@aux *{#2}}{#3}{\relax}
         }
       }{
         \IfBooleanTF{#5}{
-          \sumcorner[#2]
-          ^{#3\prime}
-          _{#4}
+          \sumcorner[#2]^{#3\prime}_{#4}
         }{
           \@sumcorner@mathpalette
           {\@sumcorner@aux {#2}}{#3}{#4}
