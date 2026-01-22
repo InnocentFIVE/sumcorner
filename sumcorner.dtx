@@ -354,31 +354,59 @@ and README.md.
 % \begin{macro}{\sumcorner}
 %    \begin{macrocode}
 \ExplSyntaxOff
-\NewDocumentCommand { \sumcorner } { s O{\prime} e{^_} } {
-  \mathop {
-  \IfNoValueTF { #3 } {
-      \IfNoValueTF { #4 } {
-      \sum \nolimits ^ { #2 }
-      } {
-      \@sumcorner@mathpalette
-        { \@sumcorner@aux { #1} } { \relax } { #4 }
+\NewDocumentCommand{\sumcorner}{s O{\prime} e{^_} t'}{
+  \IfNoValueTF{#3}{
+    \IfNoValueTF{#4}{
+      \sum \nolimits ^{#2}
+    }{
+      \IfBooleanTF{#5}{
+        \sumcorner[#2]
+        ^{\prime}
+        _{#4}
+      }{
+        \@sumcorner@mathpalette
+        {\@sumcorner@aux{#2}}{\relax}{#4}
       }
-  } {
-      \IfBooleanTF { #1 } {
-      \IfNoValueTF { #4 } {
-          \@sumcorner@mathpalette 
-          { \@sumcorner@aux * { #2 } } { #3 } { \relax }
-      } {
+    }
+  }{
+    \IfBooleanTF{#1}{
+      \IfNoValueTF{#4}{
+        \IfBooleanTF{#5}{
+          \sumcorner[#2]
+          ^{#3\prime}
+          _{#4}
+        }{
           \@sumcorner@mathpalette
-            { \@sumcorner@aux * { #2 } } { #3 } { #4 }
+          {\@sumcorner@aux *{#2}}{#3}{\relax}
+        }
+      }{
+        \IfBooleanTF{#5}{
+          \sumcorner[#2]
+          ^{#3\prime}
+          _{#4}
+        }{
+          \@sumcorner@mathpalette
+          {\@sumcorner@aux *{#2}}{#3}{#4}
+        }
       }
-      } {
-      \IfNoValueTF { #4 } {
+    }{
+      \IfNoValueTF{#4}{
+        \IfBooleanTF{#5}{
+          \sumcorner[#2]
+          ^{#3\prime}
+          _{#4}
+        }{
           \@sumcorner@mathpalette
-            { \@sumcorner@aux { #2 } } { #3 } { \relax }
-      } {
+          {\@sumcorner@aux *{#2}}{#3}{\relax}
+        }
+      }{
+        \IfBooleanTF{#5}{
+          \sumcorner[#2]
+          ^{#3\prime}
+          _{#4}
+        }{
           \@sumcorner@mathpalette
-            { \@sumcorner@aux { #2 } } { #3 } { #4 }
+          {\@sumcorner@aux {#2}}{#3}{#4}
         }
       }
     }
