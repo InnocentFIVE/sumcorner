@@ -308,38 +308,43 @@ and README.md.
 % \begin{macro}{\@sumcorner@aux}
 %    \begin{macrocode}
 \NewDocumentCommand { \@sumcorner@aux }{ smmmm } {
-  \hbox_set:Nn \l_@@_tmpa_box { $ #3 \sum $ }
-  \hbox_set:Nn \l_@@_tmpb_box { $ #3 \sum \nolimits ^ { #2 } $ }
-  \hbox_set:Nn \l_@@_tmpc_box { $ #3 ^ { #4 } $ }
-  \hbox_set:Nn \l_@@_tmpd_box { $ #3 \sb { #5 } $ }
-  \dim_set:Nn \l_@@_tmpb_dim {
-    \dim_max:nn { \box_wd:N \l_@@_tmpc_box } 
-    { \box_wd:N \l_@@_tmpd_box }
+  \hbox_set:Nn \l__sumcorner_tmpa_box { $ #3 \sum $ }
+  \hbox_set:Nn \l__sumcorner_tmpb_box { $ #3 \sum \nolimits ^ { #2 } $ }
+  \hbox_set:Nn \l__sumcorner_tmpc_box { $ #3 ^ { #4 } $ }
+  \hbox_set:Nn \l__sumcorner_tmpd_box { $ #3 \sb { #5 } $ }
+  \dim_set:Nn \l__sumcorner_tmpb_dim {
+    \dim_max:nn { \box_wd:N \l__sumcorner_tmpc_box }
+    { \box_wd:N \l__sumcorner_tmpd_box }
   }
-  \dim_compare:nNnTF { \box_wd:N \l_@@_tmpc_box } > 
-  { \box_wd:N \l_@@_tmpa_box } {
+  \dim_compare:nNnTF { \box_wd:N \l__sumcorner_tmpc_box } >
+    { \box_wd:N \l__sumcorner_tmpa_box } {
       \IfBooleanTF { #1 } {
-        \dim_set:Nn \l_@@_tmpc_dim { \c_zero_dim }
+        \dim_set:Nn \l__sumcorner_tmpc_dim { \c_zero_dim }
       } {
-        \dim_set:Nn \l_@@_tmpc_dim { 
-          \dim_eval:n { ( \box_wd:N \l_@@_tmpc_box - 
-          \box_wd:N \l_@@_tmpa_box ) / 2 } 
+        \dim_set:Nn \l__sumcorner_tmpc_dim {
+          \dim_eval:n { ( \box_wd:N \l__sumcorner_tmpc_box -
+            \box_wd:N \l__sumcorner_tmpa_box ) / 2 }
         }
       }
     } {
-      \dim_set:Nn \l_@@_tmpc_dim { \c_zero_dim }
+      \dim_set:Nn \l__sumcorner_tmpc_dim { \c_zero_dim }
     }
-  \dim_set:Nn \l_@@_tmpa_dim 
-  { \dim_eval:n { \box_wd:N \l_@@_tmpb_box -
-   \box_wd:N \l_@@_tmpa_box + \l_@@_tmpc_dim } }
-  \dim_set:Nn \l_@@_tmpd_dim 
-  { \dim_eval:n { \box_wd:N \l_@@_tmpb_box -
-   \box_wd:N \l_@@_tmpa_box } }
+  \dim_set:Nn \l__sumcorner_tmpa_dim
+  { \dim_eval:n { \box_wd:N \l__sumcorner_tmpb_box -
+      \box_wd:N \l__sumcorner_tmpa_box + \l__sumcorner_tmpc_dim } }
+  \dim_set:Nn \l__sumcorner_tmpd_dim
+  { \dim_eval:n {
+      \l__sumcorner_tmpc_dim
+      + \dim_max:nn { \c_zero_dim }
+      { 2 \box_wd:N \l__sumcorner_tmpb_box -
+        \box_wd:N \l__sumcorner_tmpa_box - \l__sumcorner_tmpb_dim } / 2
+      - \c_zero_dim
+    } }
   \tex_mathop:D { }
-  \tex_kern:D -\l_@@_tmpd_dim \tex_mathopen:D { }
-  \tex_mathop:D 
-  { \_@@_inverse_kern:N \l_@@_tmpa_dim 
-  \sum \tex_nolimits:D ^ { \tex_kern:D \l_@@_tmpc_dim \smash { #2 } } } 
+  \tex_kern:D -\l__sumcorner_tmpd_dim \tex_mathopen:D { }
+  \tex_mathop:D
+  { \__sumcorner_inverse_kern:N \l__sumcorner_tmpa_dim
+    \sum \tex_nolimits:D ^ { \tex_kern:D \l__sumcorner_tmpc_dim \smash { #2 } } }
   \tex_limits:D ^ { #4 } \sb { #5 }
 }
 %    \end{macrocode}
