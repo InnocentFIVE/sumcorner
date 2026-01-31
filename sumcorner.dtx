@@ -375,8 +375,8 @@ and README.md.
 %  最后简单分类讨论一下即可。
 % \begin{macro}{\sumcorner}
 %    \begin{macrocode}
-\exp_args:NNe \NewDocumentCommand { \sumcorner }
-{ s O{\prime} E{^\c_sumcorner_math_subscript_token}{{}{}} t' } {
+\exp_args:NNe \NewDocumentCommand \sumcorner
+{ s O{\prime} E{^\c_@@_math_subscript_token}{{}{}} t' } {
   \IfBooleanTF { #1 } {
     \IfBooleanTF { #5 } {
       \sumcorner * [ #2 ] \c_math_superscript_token
