@@ -288,12 +288,21 @@ and README.md.
 \dim_new:N \l_@@_tmpd_dim
 %    \end{macrocode}
 % \end{variable}
+% \begin{variable}{\c_@@_math_subscript_token}
+% 现在定义一个 |_| 的替代。
+%    \begin{macrocode}
+\tl_new:N \c_@@_math_subscript_token
+\tl_set:Nn \c_@@_math_subscript_token {
+  \char_generate:nn { `\_ } { 8 }
+}
+%    \end{macrocode}
+% \end{variable}
 % 
 % \subsection{具体实现}
-% \begin{macro}{\@sumcorner@mathpalette,\_@@_inverse_kern:N}
+% \begin{macro}{\@@_mathpalette:nnn,\_@@_inverse_kern:N}
 %    首先是一个 |\mathpalette| 的多元替代，
 %    \begin{macrocode}
-\cs_new:Npn \@sumcorner@mathpalette #1#2#3 {
+\cs_new:Npn \@@_mathpalette:nnn #1#2#3 {
   \tex_mathchoice:D { #1\tex_displaystyle:D { #2 } { #3 } }
   { #1\tex_textstyle:D { #2 } { #3 } }
   { #1\tex_scriptstyle:D { #2 } { #3 } }
@@ -305,9 +314,9 @@ and README.md.
 %    \end{macrocode}
 % \end{macro}
 % 然后一通爆算，
-% \begin{macro}{\@sumcorner@aux}
+% \begin{macro}{\@@_aux:}
 %    \begin{macrocode}
-\NewDocumentCommand { \@sumcorner@aux }{ smmmm } {
+\NewDocumentCommand { \@@_aux: }{ smmmm } {
   \hbox_set:Nn \l__sumcorner_tmpa_box { $ #3 \sum $ }
   \hbox_set:Nn \l__sumcorner_tmpb_box { $ #3 \sum \nolimits ^ { #2 } $ }
   \hbox_set:Nn \l__sumcorner_tmpc_box { $ #3 ^ { #4 } $ }
@@ -332,44 +341,57 @@ and README.md.
   \dim_set:Nn \l__sumcorner_tmpa_dim
   { \dim_eval:n { \box_wd:N \l__sumcorner_tmpb_box -
       \box_wd:N \l__sumcorner_tmpa_box + \l__sumcorner_tmpc_dim } }
- \dim_set:Nn \l__sumcorner_tmpd_dim
-  { \dim_eval:n {
-      \dim_max:nn { \box_wd:N \l__sumcorner_tmpb_box 
-      - \box_wd:N \l__sumcorner_tmpa_box + \l__sumcorner_tmpc_dim  } 
-      { ( \l__sumcorner_tmpb_dim - \box_wd:N \l__sumcorner_tmpa_box ) / 2  }
-      - \dim_max:nn { \c_zero_dim } 
-      { \l__sumcorner_tmpb_dim - \box_wd:N \l__sumcorner_tmpa_box } / 2
-      - \c_zero_dim
-    } } 
+  \dim_set:Nn \l__sumcorner_tmpd_dim
+   { \dim_eval:n {
+       \dim_max:nn { \box_wd:N \l__sumcorner_tmpb_box 
+       - \box_wd:N \l__sumcorner_tmpa_box + \l__sumcorner_tmpc_dim  } 
+       { ( \l__sumcorner_tmpb_dim - \box_wd:N \l__sumcorner_tmpa_box ) / 2  }
+       - \dim_max:nn { \c_zero_dim } 
+       { \l__sumcorner_tmpb_dim - \box_wd:N \l__sumcorner_tmpa_box } / 2
+       - \c_zero_dim
+     } } 
   \tex_mathop:D { }
   \tex_kern:D -\l__sumcorner_tmpd_dim \tex_mathopen:D { }
-  \tex_mathop:D
-  { \__sumcorner_inverse_kern:N \l__sumcorner_tmpa_dim
-    \sum \tex_nolimits:D ^ { \tex_kern:D \l__sumcorner_tmpc_dim \smash { #2 } } }
+  \hbox_set:Nn \l__sumcorner_tmpa_box { $
+      \cs_if_eq:NNTF #3 \tex_displaystyle:D { \tex_scriptstyle:D } {
+        \cs_if_eq:NNTF #3 \tex_textstyle:D
+        { \tex_scriptstyle:D } 
+        { \tex_scriptscriptstyle:D }
+      }
+      #2 $ }
+  \tex_mathop:D { 
+    \__sumcorner_inverse_kern:N \l__sumcorner_tmpa_dim
+    \sum \tex_nolimits:D \c_math_superscript_token {
+      \tex_kern:D \l__sumcorner_tmpc_dim
+      \box_set_ht:Nn \l__sumcorner_tmpa_box { \c_zero_dim }
+      \box_use:N \l__sumcorner_tmpa_box
+    } }
   \tex_limits:D
-  \tl_if_blank:nTF { #4 } { } { ^ { #4 } }
-  \tl_if_blank:nTF { #5 } { } { \sb { #5 } }
+  \tl_if_blank:nTF { #4 } { } { \c_math_superscript_token { #4 } }
+  \tl_if_blank:nTF { #5 } { } { \c_math_subscript_token { #5 } } 
 }
 %    \end{macrocode}
 %  \end{macro}
 %  最后简单分类讨论一下即可。
 % \begin{macro}{\sumcorner}
 %    \begin{macrocode}
-\ExplSyntaxOff
-\NewDocumentCommand{\sumcorner}{s O{\prime} E{^_}{{}{}} t'}{
-  \IfBooleanTF{#1}{
-    \IfBooleanTF{#5}{
-      \sumcorner *[#2]^{#3\prime}_{#4}
-    }{
-      \@sumcorner@mathpalette
-      {\@sumcorner@aux *{#2}}{#3}{#4}
+\exp_args:NNe \NewDocumentCommand { \sumcorner }
+{ s O{\prime} E{^\c_sumcorner_math_subscript_token}{{}{}} t' } {
+  \IfBooleanTF { #1 } {
+    \IfBooleanTF { #5 } {
+      \sumcorner * [ #2 ] \c_math_superscript_token
+      { #3 \prime } \c_math_subscript_token { #4 }
+    } {
+      \@@_mathpalette:nnn
+      { \@@_aux: *{ #2 } } { #3 } { #4 }
     }
-  }{
-    \IfBooleanTF{#5}{
-      \sumcorner[#2]^{#3\prime}_{#4}
-    }{
-      \@sumcorner@mathpalette
-      {\@sumcorner@aux {#2}}{#3}{#4}
+  } {
+    \IfBooleanTF { #5 } {
+      \sumcorner [ #2 ] \c_math_superscript_token
+      { #3 \prime } \c_math_subscript_token { #4 }
+    } {
+      \@@_mathpalette:nnn
+      { \@@_aux: { #2 } } { #3 } { #4 }
     }
   }
 }
