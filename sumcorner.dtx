@@ -218,9 +218,9 @@ and README.md.
 % 综上所述，我们证明了萨姆之角的存在性。
 % 
 % \section{使用方法}
-% \begin{function}{\sumcorner}
+% \begin{function}{\SideSet}
 % \begin{fsyntax}
-%     \sumcorner (*\oarg{*}*) _ (*\oarg{下标}*) ^ (*\oarg{上标}*)
+%     \SideSet (*\oarg{*}*) [^(*\meta{上标}*)_(*\meta{下标}*)] [^(*\meta{上标}*)_(*\meta{下标}*)] (*\marg{萨姆}*)
 % \end{fsyntax}
 % 这样就可以了。使用 |*| 和不使用 |*| 的区别是：
 % \[
@@ -228,7 +228,29 @@ and README.md.
 % \sumcorner^{100A+10B}\sb {j=B} f(j) .
 % \]
 % \end{function}
-% 
+% 我们给出一个复杂一点的例子：
+% \begin{latexexample}
+%   \[
+%     \left[
+%       \SideSet
+%       [ ^{\mathrm{LU}} _{\mathrm{LD}} \mathbf{k} ]
+%       [ ^{\mathrm{v}} _{\mathbf{C}} ]
+%       {\text{F-}\mathopen{}\bigcup}
+%       _{\cs{SideSet}}^{\textsl{the~corner~of~summation}} \mathrm{me}^{50}
+%     \right]
+%     =
+%     \text{Thursday}
+%   \]
+% \end{latexexample}
+% \[
+%  \left[
+%   \SideSet
+%   [ ^{\mathrm{LU}} \sb {\mathrm{LD}}\mathbf{k} ]
+%   [ ^{\mathrm{v}} \sb {\mathbf{C}} ]
+%   {\text{F-}\mathopen{}\bigcup}
+%   \sb {\cs{SideSet}}^{\textsl{the~corner~of~summation}} \mathrm{me}^{50}
+% \right] = \text{Thursday}
+% \]
 % \end{documentation}
 % 
 % \EnableImplementation
@@ -269,10 +291,18 @@ and README.md.
 % \l_@@_tmpc_box,
 % \l_@@_tmpd_box,
 % \l_@@_tmpe_box,
+% \l_@@_tmpf_box,
 % \l_@@_tmpa_dim,
 % \l_@@_tmpb_dim,
 % \l_@@_tmpc_dim,
-% \l_@@_tmpd_dim
+% \l_@@_tmpd_dim,
+% \l_@@_tmpe_dim,
+% \l_@@_tmpf_dim,
+% \l_@@_tmpg_dim,
+% \l_@@_tmph_dim,
+% \l_@@_tmpi_dim,
+% \l_@@_tmpj_dim,
+% \l_@@_tmpk_dim
 % }
 % 临时变量声明。
 %    \begin{macrocode}
@@ -281,11 +311,19 @@ and README.md.
 \box_new:N \l_@@_tmpc_box
 \box_new:N \l_@@_tmpd_box
 \box_new:N \l_@@_tmpe_box
+\box_new:N \l_@@_tmpf_box
 
 \dim_new:N \l_@@_tmpa_dim
 \dim_new:N \l_@@_tmpb_dim
 \dim_new:N \l_@@_tmpc_dim
 \dim_new:N \l_@@_tmpd_dim
+\dim_new:N \l_@@_tmpe_dim
+\dim_new:N \l_@@_tmpf_dim
+\dim_new:N \l_@@_tmpg_dim
+\dim_new:N \l_@@_tmph_dim
+\dim_new:N \l_@@_tmpi_dim
+\dim_new:N \l_@@_tmpj_dim
+\dim_new:N \l_@@_tmpk_dim
 %    \end{macrocode}
 % \end{variable}
 % \begin{variable}{\c_@@_math_subscript_token}
@@ -299,99 +337,241 @@ and README.md.
 % \end{variable}
 % 
 % \subsection{具体实现}
-% \begin{macro}{\@@_mathpalette:nnn,\_@@_inverse_kern:N}
+% \begin{macro}{\@@_mathpalette:nnnn}
 %    首先是一个 |\mathpalette| 的多元替代，
 %    \begin{macrocode}
-\cs_new:Npn \@@_mathpalette:nnn #1#2#3 {
-  \tex_mathchoice:D { #1\tex_displaystyle:D { #2 } { #3 } }
-  { #1\tex_textstyle:D { #2 } { #3 } }
-  { #1\tex_scriptstyle:D { #2 } { #3 } }
-  { #1\tex_scriptscriptstyle:D { #2 } { #3 } }
-}
-\cs_new:Nn \_@@_inverse_kern:N {
-  \tex_kern:D #1 \tex_mathopen:D { }
+\cs_new:Npn \@@_mathpalette:nnnn #1#2#3#4 {
+  \tex_mathchoice:D { #1\tex_displaystyle:D { #2 } { #3 } { #4 } }
+  { #1\tex_textstyle:D { #2 } { #3 } { #4 } }
+  { #1\tex_scriptstyle:D { #2 } { #3 } { #4 } }
+  { #1\tex_scriptscriptstyle:D { #2 } { #3 } { #4 } }
 }
 %    \end{macrocode}
 % \end{macro}
-% 然后一通爆算，
-% \begin{macro}{\@@_aux:}
+% 以及一些辅助命令，
+% \begin{macro}{\@@_prg_until_q_stop:,\@@_auxi:w,\@@_auxii:w,\@@_auxiii:w}
 %    \begin{macrocode}
-\NewDocumentCommand { \@@_aux: }{ smmmm } {
-  \hbox_set:Nn \l__sumcorner_tmpa_box { $ #3 \sum $ }
-  \hbox_set:Nn \l__sumcorner_tmpb_box { $ #3 \sum \nolimits ^ { #2 } $ }
-  \hbox_set:Nn \l__sumcorner_tmpc_box { $ #3 ^ { #4 } $ }
-  \hbox_set:Nn \l__sumcorner_tmpd_box { $ #3 \sb { #5 } $ }
-  \dim_set:Nn \l__sumcorner_tmpb_dim {
-    \dim_max:nn { \box_wd:N \l__sumcorner_tmpc_box }
-    { \box_wd:N \l__sumcorner_tmpd_box }
+\cs_set:Npn \@@_prg_until_q_stop: #1 \q_stop { \prg_do_nothing: }
+\exp_args:NNe \NewDocumentCommand { \@@_auxi:w }
+{ mE{^\c_@@_math_subscript_token}{{}{}} } {
+  \hbox_set:Nn \l_tmpa_box { $ #1 ^ { #2 } $ }
+  \dim_set:Nn \l_@@_tmpg_dim { \box_wd:N \l_tmpa_box }
+  \hbox_set:Nn \l_tmpa_box { $ #1 \sb { #3 } $ }
+  \dim_set:Nn \l_@@_tmpf_dim { \box_wd:N \l_tmpa_box }
+  \dim_set:Nn \l_@@_tmpe_dim { \l_@@_tmpk_dim 
+  - \dim_max:nn { \l_@@_tmpg_dim }
+  { \l_@@_tmpf_dim } }
+  \@@_prg_until_q_stop:
+}
+\exp_args:NNe \NewDocumentCommand { \@@_auxii:w }
+  { mO{}O{}mmE{^\c_@@_math_subscript_token}{{}{}} } {
+  ^ { #4 #6 #2 } \sb { #5 #7 #3 }
+}
+\exp_args:NNe \NewDocumentCommand { \@@_auxiii:w }
+  { mO{}O{}mmE{^\c_@@_math_subscript_token}{{}{}} } {
+  ^ { #4 #6 #2 } \sb { #5 #7 #3 }
+  \tex_kern:D \dim_max:nn
+  { \dim_min:nn { \l_@@_tmpi_dim }
+    { \l_@@_tmph_dim } - \l_@@_tmpe_dim }
+  { \c_zero_dim }
+}
+%    \end{macrocode}
+%  \end{macro}
+% 然后一通爆算，
+%  \begin{macro}{\@@_aux:nnnnnnn}
+%    \begin{macrocode}
+\NewDocumentCommand { \@@_aux:nnnnnnn }{ smmmmmm } {
+  \hbox_set:Nn \l_@@_tmpa_box { $ #4 #7 $ }
+  \hbox_set:Nn \l_@@_tmpe_box { $ #4 ^ { #5 } $ }
+  \hbox_set:Nn \l_@@_tmpf_box { $ #4 \sb { #6 } $ }
+  \hbox_set:Nn \l_@@_tmpd_box { $ #4 #2 $ }
+  \dim_set:Nn \l_@@_tmpk_dim { \box_wd:N \l_@@_tmpd_box }
+  \dim_set:Nn \l_@@_tmpb_dim {
+    \dim_max:nn { \box_wd:N \l_@@_tmpe_box }
+    { \box_wd:N \l_@@_tmpf_box }
   }
-  \dim_compare:nNnTF { \box_wd:N \l__sumcorner_tmpc_box } >
-    { \box_wd:N \l__sumcorner_tmpa_box } {
-      \IfBooleanTF { #1 } {
-        \dim_set:Nn \l__sumcorner_tmpc_dim { \c_zero_dim }
-      } {
-        \dim_set:Nn \l__sumcorner_tmpc_dim {
-          \dim_eval:n { ( \box_wd:N \l__sumcorner_tmpc_box -
-            \box_wd:N \l__sumcorner_tmpa_box ) / 2 }
-        }
+  \hbox_set:Nn \l_@@_tmpb_box { \box_use:N \c_empty_box }
+  \box_set_ht:Nn \l_@@_tmpb_box 
+  { \box_ht:N \l_@@_tmpa_box }
+  \box_set_dp:Nn \l_@@_tmpb_box 
+  { \box_dp:N \l_@@_tmpa_box }
+  \dim_compare:nNnTF { \box_wd:N \l_@@_tmpe_box } >
+    { \box_wd:N \l_@@_tmpa_box } {
+      \dim_set:Nn \l_@@_tmpi_dim {
+        \dim_eval:n { ( \box_wd:N \l_@@_tmpe_box -
+          \box_wd:N \l_@@_tmpa_box ) / 2 }
       }
-    } {
-      \dim_set:Nn \l__sumcorner_tmpc_dim { \c_zero_dim }
+    } { \dim_set:Nn \l_@@_tmpi_dim { \c_zero_dim } }
+  \dim_compare:nNnTF { \box_wd:N \l_@@_tmpf_box } >
+    { \box_wd:N \l_@@_tmpa_box } {
+      \dim_set:Nn \l_@@_tmph_dim {
+        \dim_eval:n { ( \box_wd:N \l_@@_tmpf_box -
+          \box_wd:N \l_@@_tmpa_box ) / 2 }
+      }
+    } { \dim_set:Nn \l_@@_tmph_dim { \c_zero_dim } }
+  \IfBooleanTF { #1 } {
+    \hbox_set:Nn \l_@@_tmpc_box {
+      $ #4 #7 \nolimits \@@_auxii:w
+        { #4 } { } { } #3 $
     }
-  \dim_set:Nn \l__sumcorner_tmpa_dim
-  { \dim_eval:n { \box_wd:N \l__sumcorner_tmpb_box -
-      \box_wd:N \l__sumcorner_tmpa_box + \l__sumcorner_tmpc_dim } }
-  \dim_set:Nn \l__sumcorner_tmpd_dim
-   { \dim_eval:n {
-       \dim_max:nn { \box_wd:N \l__sumcorner_tmpb_box 
-       - \box_wd:N \l__sumcorner_tmpa_box + \l__sumcorner_tmpc_dim  } 
-       { ( \l__sumcorner_tmpb_dim - \box_wd:N \l__sumcorner_tmpa_box ) / 2  }
-       - \dim_max:nn { \c_zero_dim } 
-       { \l__sumcorner_tmpb_dim - \box_wd:N \l__sumcorner_tmpa_box } / 2
-       - \c_zero_dim
-     } } 
-  \tex_mathop:D { }
-  \tex_kern:D -\l__sumcorner_tmpd_dim \tex_mathopen:D { }
-  \hbox_set:Nn \l__sumcorner_tmpa_box { $
-      \cs_if_eq:NNTF #3 \tex_displaystyle:D { \tex_scriptstyle:D } {
-        \cs_if_eq:NNTF #3 \tex_textstyle:D
-        { \tex_scriptstyle:D } 
-        { \tex_scriptscriptstyle:D }
+  } {
+    \hbox_set:Nn \l_@@_tmpc_box {
+      $ #4 #7 \nolimits \@@_auxii:w
+        { #4 }
+        { \tex_kern:D \l_@@_tmpi_dim }
+        { \tex_kern:D \l_@@_tmph_dim } #3 $
+    }
+  }
+  \dim_set:Nn \l_@@_tmpa_dim {
+    \box_wd:N \l_@@_tmpc_box - \box_wd:N \l_@@_tmpa_box
+  }
+  \dim_set:Nn \l_@@_tmpc_dim
+  {
+    \dim_max:nn 
+    { \box_wd:N \l_@@_tmpc_box - 
+      \box_wd:N \l_@@_tmpa_box }
+    { ( \l_@@_tmpb_dim - \box_wd:N \l_@@_tmpa_box ) / 2 }
+    - \dim_max:nn { \c_zero_dim }
+    { \l_@@_tmpb_dim - \box_wd:N \l_@@_tmpa_box } / 2
+    - \c_zero_dim
+  }
+  \@@_auxi:w { #4 } #2 \q_stop
+  \dim_set:Nn \l_@@_tmpj_dim 
+  { \dim_max:nn { \l_@@_tmph_dim } 
+    { \l_@@_tmpi_dim } }
+  \IfBooleanTF { #1 } {
+    \dim_set:Nn \l_tmpa_dim { \l_@@_tmpj_dim }
+    \dim_set:Nn \l_tmpb_dim { \l_tmpa_dim }
+  } {
+    \box_set_ht:Nn \l_@@_tmpc_box 
+      { \box_ht:N \l_@@_tmpb_box }
+    \box_set_dp:Nn \l_@@_tmpc_box 
+      { \box_dp:N \l_@@_tmpb_box }
+    \dim_set:Nn \l_tmpa_dim {
+      \dim_max:nn { \l_@@_tmpj_dim } 
+      { \l_@@_tmpe_dim }
+      - \dim_max:nn { \l_@@_tmpi_dim }
+      { \l_@@_tmpe_dim }
+    }
+    \dim_set:Nn \l_tmpb_dim {
+      \dim_max:nn { \l_@@_tmpj_dim } 
+      { \l_@@_tmpe_dim }
+      - \dim_max:nn { \l_@@_tmph_dim } 
+      { \l_@@_tmpe_dim }
+    }
+  }
+  \IfBooleanTF { #1 } {
+    \tex_kern:D -\l_@@_tmpe_dim
+    \tex_kern:D -\l_@@_tmpj_dim
+    \tex_kern:D -\l_@@_tmpk_dim
+    \tex_kern:D \dim_max:nn {
+      \l_@@_tmpj_dim
+    } {
+      \l_@@_tmpe_dim +
+      \dim_max:nn { \l_@@_tmpg_dim } { \l_@@_tmpf_dim }
+    }
+  } {
+    \dim_set:Nn \l_@@_tmpd_dim {
+      \dim_min:nn
+      { \l_tmpa_dim + \l_@@_tmpk_dim - \l_@@_tmpg_dim }
+      { \l_tmpb_dim + \l_@@_tmpk_dim - \l_@@_tmpf_dim }
+    }
+    \tex_kern:D -\l_@@_tmpd_dim
+  }
+  \hbox_set:Nn \l_tmpa_box {
+    $
+      #4
+      \box_use:N \l_@@_tmpb_box
+      \@@_auxiii:w
+      { #4 }
+      { \tex_kern:D \l_tmpa_dim
+        \tex_kern:D \l_@@_tmpk_dim 
+        \tex_kern:D -\l_@@_tmpg_dim }
+      { \tex_kern:D \l_tmpb_dim
+        \tex_kern:D \l_@@_tmpk_dim 
+        \tex_kern:D -\l_@@_tmpf_dim } #2
+        \tex_kern:D -\l_@@_tmpj_dim
+    $
+  }
+  \tex_mathopen:D { \box_use:N \l_tmpa_box }
+  \IfBooleanT { #1 } {
+    \dim_compare:nNnTF 
+    { \box_wd:N \l_@@_tmpe_box } >
+      { \box_wd:N \l_@@_tmpa_box 
+        + \l_@@_tmpe_dim } {
+        \box_set_ht:Nn \l_@@_tmpc_box {
+          \dim_max:nn { \box_ht:N \l_tmpa_box } 
+            { \box_ht:N \l_@@_tmpc_box }
+        }
+      } {
+        \dim_compare:nNnF 
+        { \box_wd:N \l_@@_tmpe_box } >
+          { \box_wd:N \l_@@_tmpa_box } {
+            \box_set_ht:Nn \l_@@_tmpc_box 
+              { \box_ht:N \l_@@_tmpa_box }
+          } }
+    \dim_compare:nNnTF 
+    { \box_wd:N \l_@@_tmpf_box } >
+      { \box_wd:N \l_@@_tmpa_box 
+        + \l_@@_tmpe_dim } {
+        \box_set_dp:Nn \l_@@_tmpc_box {
+          \dim_max:nn { \box_dp:N \l_tmpa_box } 
+            { \box_dp:N \l_@@_tmpc_box }
+        }
+      } {
+        \dim_compare:nNnF 
+        { \box_wd:N \l_@@_tmpf_box } >
+          { \box_wd:N \l_@@_tmpa_box } {
+            \box_set_dp:Nn \l_@@_tmpc_box 
+              { \box_dp:N \l_@@_tmpa_box }
+          }
       }
-      #2 $ }
-  \tex_mathop:D { 
-    \__sumcorner_inverse_kern:N \l__sumcorner_tmpa_dim
-    \sum \tex_nolimits:D \c_math_superscript_token {
-      \tex_kern:D \l__sumcorner_tmpc_dim
-      \box_set_ht:Nn \l__sumcorner_tmpa_box { \c_zero_dim }
-      \box_use:N \l__sumcorner_tmpa_box
-    } }
+  }
+  \tex_kern:D -\l_@@_tmpc_dim \tex_mathopen:D { }
+  \tex_mathop:D { \tex_kern:D \l_@@_tmpa_dim
+    \box_use:N \l_@@_tmpc_box
+  }
   \tex_limits:D
-  \tl_if_blank:nTF { #4 } { } { \c_math_superscript_token { #4 } }
-  \tl_if_blank:nTF { #5 } { } { \c_math_subscript_token { #5 } } 
+  \tl_if_blank:nTF { #5 } { } { ^ { #5 } }
+  \tl_if_blank:nTF { #6 } { } { \sb { #6 } }
 }
 %    \end{macrocode}
 %  \end{macro}
 %  最后简单分类讨论一下即可。
-% \begin{macro}{\sumcorner}
+% \begin{macro}{\SideSet}
 %    \begin{macrocode}
-\exp_args:NNe \NewDocumentCommand \sumcorner
-{ s O{\prime} E{^\c_@@_math_subscript_token}{{}{}} t' } {
+\exp_args:NNe \NewDocumentCommand { \SideSet }
+{ s O{} O{} m E{^\c_@@_math_subscript_token}{{}{}} t' } {
+  \tex_mathop:D { }
   \IfBooleanTF { #1 } {
-    \IfBooleanTF { #5 } {
-      \sumcorner * [ #2 ] \c_math_superscript_token
-      { #3 \prime } \c_math_subscript_token { #4 }
+    \IfBooleanTF { #7 } {
+      \IfBlankTF { #5 } {
+        \IfBlankTF { #6 }
+        { \SideSet * [ #2 ] [ #3 ] { #4 } ^ { #5 \prime } }
+        { \SideSet * [ #2 ] [ #3 ] { #4 } \sb { #6 } ^ { #5 \prime } }
+      } {
+        \IfBlankTF { #6 }
+        { \SideSet * [ #2 ] [ #3 ] { #4 } ^ { #5 \prime }  }
+        { \SideSet * [ #2 ] [ #3 ] { #4 } ^ { #5 \prime } \sb { #6 } }
+      }
     } {
-      \@@_mathpalette:nnn
-      { \@@_aux: *{ #2 } } { #3 } { #4 }
+      \@@_mathpalette:nnnn
+      { \@@_aux:nnnnnnn * { #2 } { #3 } } { #5 } { #6 } { #4 }
     }
   } {
-    \IfBooleanTF { #5 } {
-      \sumcorner [ #2 ] \c_math_superscript_token
-      { #3 \prime } \c_math_subscript_token { #4 }
+    \IfBooleanTF { #7 } {
+      \IfBlankTF { #5 } {
+        \IfBlankTF { #6 }
+        { \SideSet [ #2 ] [ #3 ] { #4 } ^ { #5 \prime } }
+        { \SideSet [ #2 ] [ #3 ] { #4 } \sb { #6 } ^ { #5 \prime } }
+      } {
+        \IfBlankTF { #6 }
+        { \SideSet [ #2 ] [ #3 ] { #4 } ^ { #5 \prime }  }
+        { \SideSet [ #2 ] [ #3 ] { #4 } ^ { #5 \prime } \sb { #6 } }
+      }
     } {
-      \@@_mathpalette:nnn
-      { \@@_aux: { #2 } } { #3 } { #4 }
+      \@@_mathpalette:nnnn
+      { \@@_aux:nnnnnnn { #2 } { #3 } } { #5 } { #6 } { #4 }
     }
   }
 }
@@ -404,3 +584,24 @@ and README.md.
 %   \bibitem{summation} \rule{3em}{.4pt}. 
 %   ``At the upper right corner of summation,'' \emph{\rule{8em}{.4pt}}: 1--1. 2026.
 % \end{thebibliography}
+% \clearpage
+% \thispagestyle{empty}
+% \begin{center}
+%  \Huge\bfseries\color{white} 萨姆之角的回归。  
+% \end{center}
+% \pagecolor{black}
+% \begin{macro}{\sumcorner}
+%    \begin{macrocode}
+%<@@=sumcorner>
+%<*package>
+\NewDocumentCommand { \sumcorner } { sO{\prime} } {
+  \IfBooleanTF { #1 } { \SideSet * [ ] [ ^{#2} ] { \sum } }
+  { \SideSet [ ] [ ^{#2} ] { \sum } }
+}
+%</package>
+%<@@=>
+%    \end{macrocode}
+% \end{macro}
+% \clearpage
+% \pagecolor{white}
+
