@@ -244,7 +244,7 @@ and README.md.
 % \end{latexexample}
 % \[
 %  \left[
-%   \SideSet
+%   \SideSet*
 %   [ ^{\mathrm{LU}} \sb {\mathrm{LD}}\mathbf{k} ]
 %   [ ^{\mathrm{v}} \sb {\mathbf{C}} ]
 %   {\text{F-}\mathopen{}\bigcup}
@@ -442,6 +442,15 @@ and README.md.
   \IfBooleanTF { #1 } {
     \dim_set:Nn \l_tmpa_dim { \l_@@_tmpj_dim }
     \dim_set:Nn \l_tmpb_dim { \l_tmpa_dim }
+    \tex_kern:D -\l_@@_tmpe_dim
+    \tex_kern:D -\l_@@_tmpj_dim
+    \tex_kern:D -\l_@@_tmpk_dim
+    \tex_kern:D \dim_max:nn {
+      \l_@@_tmpj_dim
+    } {
+      \l_@@_tmpe_dim +
+      \dim_max:nn { \l_@@_tmpg_dim } { \l_@@_tmpf_dim }
+    }
   } {
     \box_set_ht:Nn \l_@@_tmpc_box 
       { \box_ht:N \l_@@_tmpb_box }
@@ -459,20 +468,8 @@ and README.md.
       - \dim_max:nn { \l_@@_tmph_dim } 
       { \l_@@_tmpe_dim }
     }
-  }
-  \IfBooleanTF { #1 } {
-    \tex_kern:D -\l_@@_tmpe_dim
-    \tex_kern:D -\l_@@_tmpj_dim
-    \tex_kern:D -\l_@@_tmpk_dim
-    \tex_kern:D \dim_max:nn {
-      \l_@@_tmpj_dim
-    } {
-      \l_@@_tmpe_dim +
-      \dim_max:nn { \l_@@_tmpg_dim } { \l_@@_tmpf_dim }
-    }
-  } {
     \dim_set:Nn \l_@@_tmpd_dim {
-      \dim_min:nn
+    \dim_min:nn
       { \l_tmpa_dim + \l_@@_tmpk_dim - \l_@@_tmpg_dim }
       { \l_tmpb_dim + \l_@@_tmpk_dim - \l_@@_tmpf_dim }
     }
